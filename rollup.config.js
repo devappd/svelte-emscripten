@@ -1,5 +1,6 @@
 import svelte from 'rollup-plugin-svelte';
 import resolve from '@rollup/plugin-node-resolve';
+import { string } from 'rollup-plugin-string';
 import pkg from './package.json';
 
 const name = pkg.name
@@ -15,6 +16,13 @@ export default {
 	],
 	plugins: [
 		svelte(),
+		// Stringify worker scripts
+		string({
+			include: [
+				'src/emscripten-component-base/worker/*.preamble.js',
+				'src/emscripten-component-base/worker/*.postamble.js'
+			]
+		}),
 		resolve()
 	]
 };

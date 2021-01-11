@@ -25,7 +25,8 @@
     "rollup": "^2.0.0",
     "rollup-plugin-svelte": "^6.0.0",
     "svelte": "^3.0.0",
-    "svelte-resize-observer": "git+https://github.com/devappd/svelte-resize-observer"
+    "svelte-resize-observer": "git+https://github.com/devappd/svelte-resize-observer",
+    "rollup-plugin-string": "^3.0.0"
   },
   "keywords": [
     "svelte",

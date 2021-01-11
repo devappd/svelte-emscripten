@@ -1,14 +1,18 @@
 <script>
   import { onDestroy, onMount } from 'svelte';
   import { ModuleManager } from './emscripten-component-base';
+  import { WorkerManager } from './emscripten-component-base';
   import ResizeObserver from 'svelte-resize-observer';
 
 ////////////////////////////////////////////////////////////////////////
 // INPUTS
 ////////////////////////////////////////////////////////////////////////
 
-  /** Emscripten Module factory to use. Required. **/
+  /** Emscripten Module factory to use. Either this or `worker` is required. **/
   export let module = null;
+
+  /** Emscripten Worker script to use, in string form. Either this or `module` is required. */
+  export let worker = null;
 
   /** Display canvas output. Default: true */
   export let canvas = true;
@@ -36,6 +40,16 @@
     return !!_managerInstance;
   }
 
+  function validateProps() {
+    if (!module && !worker)
+      throw new RangeError('Either `module` or `worker` must be specified.');
+    else if (module && worker)
+      throw new RangeError('Specify either `module` or `worker`, not both.');
+    
+    if (!module && typeof worker !== 'string')
+      throw new RangeError('Worker must be input as a JS script that is stored as a string.');
+  }
+
 ////////////////////////////////////////////////////////////////////////
 // INITIALIZATION
 ////////////////////////////////////////////////////////////////////////
@@ -52,12 +66,23 @@
       captureTabKey: !!options.global,
     };
 
-    await initializeManagerForModule(userOptions);
+    if (worker)
+      await initializeManagerForWorker(userOptions);
+    else
+      await initializeManagerForModule(userOptions);
   }
 
   async function initializeManagerForModule(userOptions) {
     _managerInstance = await ModuleManager.initialize(
       module,
+      _componentElement, _canvasElement, _consoleElement,
+      userOptions
+    );
+  }
+
+  async function initializeManagerForWorker(userOptions) {
+    _managerInstance = await WorkerManager.initialize(
+      worker,
       _componentElement, _canvasElement, _consoleElement,
       userOptions
     );
@@ -115,6 +140,7 @@
   }
 
   onMount(async () => {
+    validateProps();
     await initialize();
 
     if (options.autorun)
@@ -133,7 +159,7 @@ Run an Emscripten `Module` runtime within this reusable component.
 - Usage:
   ```jsx
   <Emscripten
-    module={YourModule}
+    module={YourModule} or worker={YourWorkerString}
     canvas={true}
     console={true}
     verticalOrientation={false}

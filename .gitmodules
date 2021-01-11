@@ -1,3 +1,4 @@
 [submodule "src/emscripten-component-base"]
 	path = src/emscripten-component-base
 	url = https://github.com/devappd/emscripten-component-base.git
+	branch = proxy-worker
